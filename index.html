@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INAS — Industry Network Analysis Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ── RESET ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --ink:      #08080E;
+  --ink2:     #0F0F18;
+  --surface:  #141420;
+  --lift:     #1C1C2C;
+  --border:   #252538;
+  --border2:  #32324A;
+  --gold:     #D4A843;
+  --gold-hi:  #EEC05A;
+  --gold-lo:  #8A6C28;
+  --text:     #E2E2D8;
+  --dim:      #666680;
+  --dim2:     #484860;
+  --green:    #3D8C5E;
+  --red:      #8C3D3D;
+  --blue:     #3D5E8C;
+  --amber:    #8C6A3D;
+}
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* ── NAV ─────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5vw;
+  height: 60px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.4s, background 0.4s;
+}
+nav.scrolled {
+  background: rgba(8,8,14,0.92);
+  backdrop-filter: blur(14px);
+  border-bottom-color: var(--border);
+}
+.nav-wordmark {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.25em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.nav-right {
+  display: flex; gap: 32px; align-items: center;
+}
+.nav-right a {
+  color: var(--dim);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+.nav-right a:hover { color: var(--text); }
+.nav-pill {
+  padding: 7px 18px;
+  border: 1px solid var(--gold-lo);
+  color: var(--gold) !important;
+  font-size: 12px !important;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  transition: background 0.2s, border-color 0.2s !important;
+}
+.nav-pill:hover { background: rgba(212,168,67,0.08); border-color: var(--gold) !important; }
+
+/* ── HERO ─────────────────────────────────────────────────── */
+.hero {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 0 5vw;
+  padding-top: 60px;
+  gap: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-grid-bg {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 80% at 50% 50%, black 0%, transparent 100%);
+  opacity: 0.35;
+}
+
+.hero-left { position: relative; z-index: 1; }
+
+.hero-statement {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(42px, 5.5vw, 76px);
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+.hero-statement .accent {
+  color: var(--gold);
+  font-style: italic;
+  font-weight: 700;
+}
+
+.hero-desc {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--dim);
+  max-width: 440px;
+  line-height: 1.75;
+  margin-bottom: 44px;
+}
+
+.hero-actions { display: flex; gap: 14px; align-items: center; }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  background: var(--gold);
+  color: var(--ink);
+  text-decoration: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-primary:hover { background: var(--gold-hi); }
+.btn-primary:active { transform: scale(0.98); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 20px;
+  border: 1px solid var(--border2);
+  color: var(--dim);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+/* hero right — phase preview strip */
+.hero-right {
+  position: relative; z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.phase-strip-item {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: default;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.phase-strip-item:first-child { border-top: 1px solid var(--border); }
+.phase-strip-item.entered { opacity: 1; transform: translateX(0); }
+
+.phase-strip-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--gold-lo);
+  padding-top: 2px;
+  letter-spacing: 0.1em;
+}
+.phase-strip-content h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.phase-strip-content p {
+  font-size: 12px;
+  color: var(--dim);
+  line-height: 1.5;
+}
+
+/* ── SECTION BASE ─────────────────────────────────────────── */
+section { position: relative; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 5vw;
+}
+
+/* ── INTRO STRIP ─────────────────────────────────────────── */
+.intro-strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 5vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+  overflow: hidden;
+}
+.strip-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; flex: 1; min-width: 0;
+}
+.strip-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+.strip-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gold);
+}
+.strip-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ── CHAPTER SECTIONS (phases) ───────────────────────────── */
+.chapter {
+  padding: 100px 5vw;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Phase header — large chapter number as structural element */
+.chapter-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  margin-bottom: 64px;
+}
+.chapter-num {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(80px, 10vw, 140px);
+  font-weight: 800;
+  color: var(--border2);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  flex-shrink: 0;
+  user-select: none;
+  transition: color 0.4s;
+}
+.chapter:hover .chapter-num { color: var(--border); }
+.chapter-meta { padding-top: 8px; }
+.chapter-phase-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: var(--gold-lo);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.chapter-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+/* Chapter body — different layouts per phase */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+.full-col { max-width: 760px; }
+
+.explain p {
+  font-size: 15px;
+  color: var(--dim);
+  line-height: 1.8;
+  margin-bottom: 18px;
+}
+.explain p:last-child { margin-bottom: 0; }
+.explain strong { color: var(--text); font-weight: 500; }
+
+/* insight callout */
+.insight {
+  margin-top: 32px;
+  padding: 20px 22px;
+  border-left: 2px solid var(--gold);
+  background: rgba(212,168,67,0.04);
+}
+.insight-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.insight p { font-size: 13px; color: var(--text); margin: 0; line-height: 1.65; }
+
+/* ── DATA CARDS ───────────────────────────────────────────── */
+.data-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px;
+}
+.data-card-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-lo);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.data-card-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.data-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.data-card .sub {
+  font-size: 12px;
+  color: var(--dim);
+  margin-bottom: 22px;
+  font-weight: 300;
+}
+
+/* ── METRIC GRID ─────────────────────────────────────────── */
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+.metric {
+  padding: 14px 16px;
+  background: var(--ink2);
+  border: 1px solid var(--border);
+}
+.metric-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--dim2);
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.metric-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.01em;
+}
+
+/* ── FUNNEL ─────────────────────────────────────────────── */
+.funnel { display: flex; flex-direction: column; gap: 0; }
+.funnel-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.funnel-row:last-child { border-bottom: none; }
+.funnel-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--dim2);
+  text-transform: uppercase;
+}
+.funnel-val {
+  font-size: 14px;
+  color: var(--dim);
+  font-weight: 400;
+}
+.funnel-row.active .funnel-key { color: var(--gold); }
+.funnel-row.active .funnel-val { color: var(--text); font-weight: 500; }
+.funnel-row.active { background: rgba(212,168,67,0.03); margin: 0 -4px; padding: 14px 4px; }
+
+/* ── MACRO INDICATORS ────────────────────────────────────── */
+.indicator-list { list-style: none; padding: 0; }
+.indicator-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.indicator-row:last-child { border-bottom: none; }
+.ind-name { font-size: 13px; color: var(--dim); flex: 1; }
+.ind-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--gold);
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
+}
+.ind-note {
+  font-size: 11px;
+  color: var(--dim2);
+  text-align: right;
+  min-width: 140px;
+  line-height: 1.4;
+}
+
+/* ── MACRO CATEGORY CARDS ────────────────────────────────── */
+.macro-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 22px;
+}
+.macro-card-icon {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--gold-lo);
+}
+.macro-card h5 {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.macro-card p { font-size: 12px; color: var(--dim); line-height: 1.6; margin-bottom: 10px; }
+.macro-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border: 1px solid var(--border2);
+  color: var(--dim2);
+  text-transform: uppercase;
+}
+
+/* ── SWOT ──────────────────────────────────────────────── */
+.swot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.swot-q {
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+}
+.swot-q.s { border-color: rgba(61,140,94,0.35); background: rgba(61,140,94,0.06); }
+.swot-q.w { border-color: rgba(140,61,61,0.35); background: rgba(140,61,61,0.06); }
+.swot-q.o { border-color: rgba(61,94,140,0.35); background: rgba(61,94,140,0.06); }
+.swot-q.t { border-color: rgba(140,106,61,0.35); background: rgba(140,106,61,0.06); }
+.swot-hd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; margin-bottom: 12px; font-weight: 500;
+}
+.swot-q.s .swot-hd { color: #5DBF8A; }
+.swot-q.w .swot-hd { color: #BF5D5D; }
+.swot-q.o .swot-hd { color: #5D85BF; }
+.swot-q.t .swot-hd { color: #BF965D; }
+.swot-q ul { list-style: none; padding: 0; }
+.swot-q li {
+  font-size: 12px; color: var(--dim);
+  padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); line-height: 1.5;
+}
+.swot-q li:last-child { border-bottom: none; }
+
+/* ── COMPETITOR TABLE ────────────────────────────────────── */
+.comp-table { width: 100%; border-collapse: collapse; }
+.comp-table thead th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--dim2);
+  text-align: left; padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.comp-table tbody td {
+  padding: 14px; font-size: 13px; color: var(--dim);
+  border-bottom: 1px solid var(--border); vertical-align: middle;
+}
+.comp-table tbody tr:last-child td { border-bottom: none; }
+.comp-table tbody tr.highlight td { color: var(--text); }
+.comp-table tbody tr.highlight td:first-child { color: var(--gold); font-weight: 500; }
+.bar-bg { height: 3px; background: var(--border); margin-top: 6px; }
+.bar-fg { height: 3px; background: var(--gold); transition: width 1s ease; }
+
+/* ── ALLOCATION ─────────────────────────────────────────── */
+.alloc-list { list-style: none; padding: 0; }
+.alloc-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 0; border-bottom: 1px solid var(--border);
+}
+.alloc-row:last-child { border-bottom: none; }
+.alloc-name { font-size: 13px; color: var(--text); min-width: 130px; }
+.alloc-bar-bg { flex: 1; height: 2px; background: var(--border); }
+.alloc-bar-fg { height: 2px; background: var(--gold); transition: width 1.2s ease; }
+.alloc-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--gold); min-width: 42px; text-align: right;
+}
+
+/* ── CLOSING ─────────────────────────────────────────────── */
+.closing {
+  padding: 140px 5vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--ink2);
+  border-top: 1px solid var(--border);
+}
+.closing-headline {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(38px, 5.5vw, 72px);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  max-width: 700px;
+  margin-bottom: 24px;
+}
+.closing-headline .accent { color: var(--gold); font-style: italic; }
+.closing-sub {
+  font-size: 16px; font-weight: 300; color: var(--dim);
+  max-width: 460px; margin-bottom: 48px; line-height: 1.7;
+}
+
+/* ── FOOTER ─────────────────────────────────────────────── */
+footer {
+  padding: 28px 5vw;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--dim2);
+  font-size: 11px;
+}
+.footer-mark {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--gold-lo);
+  text-transform: uppercase;
+}
+
+/* ── MOTION: scroll-driven chapter entry ─────────────────── */
+.chapter-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.chapter-reveal.in { opacity: 1; transform: translateY(0); }
+
+/* stagger children */
+.stagger-child {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.stagger-child.in { opacity: 1; transform: translateY(0); }
+
+/* bar grow — JS sets width to 0 initially then transitions */
+.bar-animated { width: 0 !important; }
+.bar-animated.in { width: var(--target-w) !important; }
+
+/* ── RESPONSIVE ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; padding: 100px 5vw 80px; gap: 48px; }
+  .two-col { grid-template-columns: 1fr; gap: 40px; }
+  .three-col { grid-template-columns: 1fr; gap: 16px; }
+  .swot { grid-template-columns: 1fr; }
+  nav .nav-right a:not(.nav-pill) { display: none; }
+  .intro-strip { flex-wrap: wrap; gap: 20px; }
+  .strip-divider { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-reveal, .stagger-child, .phase-strip-item { opacity: 1; transform: none; transition: none; }
+  .bar-animated { width: var(--target-w) !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-wordmark">INAS</div>
+  <div class="nav-right">
+    <a href="#phase-1">Phase 1</a>
+    <a href="#phase-3">Phase 3</a>
+    <a href="#phase-5">Phase 5</a>
+    <a href="#closing" class="nav-pill">Start Reading</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-grid-bg"></div>
+
+  <div class="hero-left">
+    <h1 class="hero-statement">
+      The system behind<br>every <span class="accent">smart</span><br>investment thesis.
+    </h1>
+    <p class="hero-desc">
+      Most people pick stocks by instinct. INAS is a six-phase framework that teaches you how to analyze a company the right way — starting from the economy, not the ticker.
+    </p>
+    <div class="hero-actions">
+      <a href="#phase-1" class="btn-primary">Read the framework ↓</a>
+      <a href="#overview" class="btn-ghost">See all phases</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="phase-strip-item" style="transition-delay:0.1s">
+      <span class="phase-strip-num">Ph.1</span>
+      <div class="phase-strip-content">
+        <h3>Choose Your Sector</h3>
+        <p>Start at the highest level. Which area of the economy are you hunting in?</p>
+      </div>
+    </div>
+    <div class="phase-strip-item" style="transition-delay:0.18s">
+      <span class="phase-strip-num">Ph.2</span>
+      <div class="phase-strip-content">
+        <h3>Read the Macro Environment</h3>
+        <p>What is the economy doing? Interest rates, inflation, GDP — they affect everything.</p>
+      </div>
+    </div>
+    <div class="phase-strip-item" style="transition-delay:0.26s">
+      <span class="phase-strip-num">Ph.3</span>
+      <div class="phase-strip-content">
+        <h3>Separate into Industry</h3>
+        <p>Tech is a sector. Software is an industry. Each level has its own rules.</p>
+      </div>
+    </div>
+    <div class="phase-strip-item" style="transition-delay:0.34s">
+      <span class="phase-strip-num">Ph.4</span>
+      <div class="phase-strip-content">
+        <h3>Analyze the Company</h3>
+        <p>Financials and SWOT — the two lenses that reveal what a company is really worth.</p>
+      </div>
+    </div>
+    <div class="phase-strip-item" style="transition-delay:0.42s">
+      <span class="phase-strip-num">Ph.5</span>
+      <div class="phase-strip-content">
+        <h3>Map the Competitor Network</h3>
+        <p>No company fights alone. Who wins, who loses, and why?</p>
+      </div>
+    </div>
+    <div class="phase-strip-item" style="transition-delay:0.5s">
+      <span class="phase-strip-num">Ph.6</span>
+      <div class="phase-strip-content">
+        <h3>Portfolio Allocation</h3>
+        <p>Turn individual analysis into a weighted, diversified portfolio decision.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STAT STRIP -->
+<div class="intro-strip" id="overview">
+  <div class="strip-item"><span class="strip-val">6</span><span class="strip-label">Phases</span></div>
+  <div class="strip-divider"></div>
+  <div class="strip-item"><span class="strip-val">Top-Down</span><span class="strip-label">Methodology</span></div>
+  <div class="strip-divider"></div>
+  <div class="strip-item"><span class="strip-val">Economy → Company</span><span class="strip-label">Zoom Level</span></div>
+  <div class="strip-divider"></div>
+  <div class="strip-item"><span class="strip-val">Microsoft</span><span class="strip-label">Running Case Study</span></div>
+</div>
+
+<!-- ═══════════ PHASE 1 ═══════════ -->
+<section class="chapter" id="phase-1">
+  <div class="chapter-reveal">
+    <div class="chapter-header">
+      <div class="chapter-num">1</div>
+      <div class="chapter-meta">
+        <p class="chapter-phase-id">Phase One</p>
+        <h2 class="chapter-title">Choose<br>Your Sector</h2>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="explain chapter-reveal" style="transition-delay:0.1s">
+        <p>The stock market is organized into <strong>11 sectors</strong> — broad categories that group companies by what they produce or sell. Technology. Healthcare. Energy. Financials. Utilities. Consumer Staples. Consumer Discretionary. Industrials. Materials. Real Estate. Communication Services.</p>
+        <p>Your first move isn't to find a stock. It's to choose <strong>where in the economy you want to hunt</strong>. This shapes everything. Sectors behave differently depending on where we are in the economic cycle — and that means a great company in the wrong sector can still be a losing investment.</p>
+        <p>When interest rates rise sharply, Utilities and Real Estate suffer because their debt costs climb. When the economy is expanding, Industrials and Consumer Discretionary tend to outperform. When recession fears spike, Healthcare and Consumer Staples hold steady because people still need medicine and groceries no matter what.</p>
+        <div class="insight">
+          <p class="insight-label">Why this comes first</p>
+          <p>Most beginners jump straight to a company they've heard about. INAS forces you to understand the context your company lives in before you ever look at its ticker. Context is the thing that separates a confident thesis from a lucky guess.</p>
+        </div>
+      </div>
+
+      <div class="data-card chapter-reveal" style="transition-delay:0.2s">
+        <p class="data-card-label">Running example</p>
+        <h4>We chose Technology</h4>
+        <p class="sub">S&amp;P 500 Sector · ~29% Index Weight</p>
+        <p style="font-size:13px; color:var(--dim); line-height:1.7; margin-bottom:20px">Technology is the largest sector in the S&amp;P 500. It spans semiconductors, cloud software, hardware, and AI infrastructure. In 2025, the primary tailwind is a massive wave of AI spending — enterprises are racing to build AI capabilities, which directly lifts revenue for the companies inside this sector.</p>
+        <div class="funnel">
+          <div class="funnel-row active">
+            <span class="funnel-key">Sector</span>
+            <span class="funnel-val">Technology ✓</span>
+          </div>
+          <div class="funnel-row">
+            <span class="funnel-key">Industry</span>
+            <span class="funnel-val">→ Phase 3</span>
+          </div>
+          <div class="funnel-row">
+            <span class="funnel-key">Company</span>
+            <span class="funnel-val">→ Phase 4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PHASE 2 ═══════════ -->
+<section class="chapter" id="phase-2" style="background: var(--ink2)">
+  <div class="chapter-reveal">
+    <div class="chapter-header">
+      <div class="chapter-num">2</div>
+      <div class="chapter-meta">
+        <p class="chapter-phase-id">Phase Two</p>
+        <h2 class="chapter-title">Read the Macro<br>Environment</h2>
+      </div>
+    </div>
+
+    <!-- Full-width explain, then 3-col macro cards below — different layout than phase 1 -->
+    <div class="explain full-col chapter-reveal" style="margin-bottom:48px; transition-delay:0.1s">
+      <p>The macroeconomic environment is the <strong>weather system your company operates in</strong>. You cannot change the weather. But if you ignore it, you'll be caught unprepared. There are five dimensions every investor needs to track before they look at any company.</p>
+      <p>These aren't abstract stats. <strong>Each one has a direct mechanism</strong> that connects to your company's earnings, its valuation multiple, or both. Understanding these connections is what separates serious analysis from surface-level research.</p>
+    </div>
+
+    <div class="three-col">
+      <div class="macro-card stagger-child" style="transition-delay:0.05s">
+        <div class="macro-card-icon">GDP</div>
+        <h5>Economic Growth</h5>
+        <p>Shows how hot or cold the overall economy is. A growing economy means more corporate spending, which lifts revenue across many sectors.</p>
+        <div class="macro-tags">
+          <span class="tag">GDP</span><span class="tag">PMI</span><span class="tag">Unemployment</span>
+        </div>
+      </div>
+      <div class="macro-card stagger-child" style="transition-delay:0.1s">
+        <div class="macro-card-icon">CPI</div>
+        <h5>Inflation &amp; Pricing</h5>
+        <p>When prices rise faster than revenue can absorb, margins compress. High inflation also forces the Fed to raise rates — which ripples everywhere.</p>
+        <div class="macro-tags">
+          <span class="tag">CPI</span><span class="tag">PPI</span><span class="tag">Commodity Prices</span>
+        </div>
+      </div>
+      <div class="macro-card stagger-child" style="transition-delay:0.15s">
+        <div class="macro-card-icon">FFR</div>
+        <h5>Interest Rates &amp; Credit</h5>
+        <p>The Fed Funds Rate sets the price of money. Higher rates mean higher borrowing costs for companies and a higher discount rate on future earnings.</p>
+        <div class="macro-tags">
+          <span class="tag">Fed Rate</span><span class="tag">10Y Treasury</span>
+        </div>
+      </div>
+      <div class="macro-card stagger-child" style="transition-delay:0.2s">
+        <div class="macro-card-icon">CCI</div>
+        <h5>Consumer Confidence</h5>
+        <p>Consumer sentiment drives spending decisions. Low confidence means delayed purchases — critical for Consumer Discretionary and cyclical sectors.</p>
+        <div class="macro-tags">
+          <span class="tag">CCI</span><span class="tag">Retail Sales</span><span class="tag">PCE</span>
+        </div>
+      </div>
+      <div class="macro-card stagger-child" style="transition-delay:0.25s">
+        <div class="macro-card-icon">FX</div>
+        <h5>Global &amp; Geopolitical</h5>
+        <p>Exchange rates, trade policy, and supply chain dynamics affect any company with international revenue, manufacturing, or material sourcing.</p>
+        <div class="macro-tags">
+          <span class="tag">Exchange Rates</span><span class="tag">Trade Policy</span>
+        </div>
+      </div>
+      <div class="data-card stagger-child" style="transition-delay:0.3s">
+        <p class="data-card-label">Case study — 2025</p>
+        <ul class="indicator-list">
+          <li class="indicator-row">
+            <span class="ind-name">Fed Funds Rate</span>
+            <span class="ind-val">4.25–4.5%</span>
+          </li>
+          <li class="indicator-row">
+            <span class="ind-name">10Y Treasury</span>
+            <span class="ind-val">~4.3%</span>
+          </li>
+          <li class="indicator-row">
+            <span class="ind-name">CPI Inflation</span>
+            <span class="ind-val">~2.4%</span>
+          </li>
+          <li class="indicator-row">
+            <span class="ind-name">GDP Growth</span>
+            <span class="ind-val">~2.0%</span>
+          </li>
+          <li class="indicator-row">
+            <span class="ind-name">AI Capex Cycle</span>
+            <span class="ind-val">↑ Strong</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="insight chapter-reveal" style="max-width:700px; margin-top:40px; transition-delay:0.35s">
+      <p class="insight-label">Why Tech investors should care about interest rates</p>
+      <p>When rates are high, analysts discount future earnings more aggressively. This is why high-growth Tech companies — whose value depends on earnings years from now — often suffer more than mature dividend-paying companies when rates rise. Macro awareness helps you time your entries.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PHASE 3 ═══════════ -->
+<section class="chapter" id="phase-3">
+  <div class="chapter-reveal">
+    <div class="chapter-header">
+      <div class="chapter-num">3</div>
+      <div class="chapter-meta">
+        <p class="chapter-phase-id">Phase Three</p>
+        <h2 class="chapter-title">Separate<br>into Industry</h2>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="data-card chapter-reveal" style="transition-delay:0.1s; order:2">
+        <p class="data-card-label">Case study</p>
+        <h4>Technology → Enterprise Software</h4>
+        <p class="sub">Sector → Industry</p>
+        <div class="funnel" style="margin-bottom:24px">
+          <div class="funnel-row">
+            <span class="funnel-key">Sector</span>
+            <span class="funnel-val">Technology</span>
+          </div>
+          <div class="funnel-row active">
+            <span class="funnel-key">Industry</span>
+            <span class="funnel-val">Enterprise Software ✓</span>
+          </div>
+          <div class="funnel-row">
+            <span class="funnel-key">Company</span>
+            <span class="funnel-val">→ Phase 4</span>
+          </div>
+        </div>
+        <p style="font-size:13px; color:var(--dim); line-height:1.7">Enterprise software companies sell to businesses, not consumers. Revenue is largely recurring — annual subscriptions that get renewed. This makes it more predictable than consumer hardware but means sales cycles are long and relationships take years to build.</p>
+        <div style="margin-top:18px; padding:14px; border:1px solid var(--border); background:var(--ink2)">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.18em; color:var(--dim2); text-transform:uppercase; margin-bottom:10px">Industry characteristics</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+            <div><div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim2); margin-bottom:2px">Gross Margin</div><div style="font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:var(--gold)">65–80%</div></div>
+            <div><div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim2); margin-bottom:2px">Revenue Type</div><div style="font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:var(--gold)">Recurring</div></div>
+            <div><div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim2); margin-bottom:2px">Customer Lock-in</div><div style="font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:var(--gold)">High</div></div>
+            <div><div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim2); margin-bottom:2px">Sales Cycle</div><div style="font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:var(--gold)">Long</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="explain chapter-reveal" style="transition-delay:0.2s; order:1">
+        <p>A sector is a neighborhood. An industry is a specific block inside it. Technology alone contains <strong>semiconductors, enterprise software, consumer hardware, IT services, internet platforms, and cloud infrastructure</strong> — each with completely different revenue models and risk profiles.</p>
+        <p>Semiconductors are <strong>deeply cyclical</strong> — they boom when chip demand spikes and crash when inventory builds up. Enterprise software is stickier — companies pay annual subscriptions and switching costs are high. Consumer hardware follows device replacement cycles. Each industry plays by different rules and responds differently to macro conditions.</p>
+        <p>When you separate into industries, you're asking a sharper question: <strong>which sub-arena has the structural dynamics I want to invest in?</strong> High and stable margins? Rapid growth? Resilience in downturns? Each industry answers those differently.</p>
+        <div class="insight">
+          <p class="insight-label">The zoom-in principle</p>
+          <p>Saying "I invest in Tech" is like saying "I live on Earth." True, but it tells you almost nothing. The industry level is where real decisions start — because that's where unit economics, margin structures, and competitive dynamics become specific enough to compare.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PHASE 4 ═══════════ -->
+<section class="chapter" id="phase-4" style="background: var(--ink2)">
+  <div class="chapter-reveal">
+    <div class="chapter-header">
+      <div class="chapter-num">4</div>
+      <div class="chapter-meta">
+        <p class="chapter-phase-id">Phase Four</p>
+        <h2 class="chapter-title">Analyze<br>the Company</h2>
+      </div>
+    </div>
+
+    <div class="explain full-col chapter-reveal" style="margin-bottom:48px; transition-delay:0.1s">
+      <p>Now you're inside the company. This phase combines <strong>quantitative analysis</strong> (financial metrics) with <strong>qualitative analysis</strong> (the SWOT framework). Neither is enough alone — a company with great metrics but no competitive moat can deteriorate, while a company with a strong moat and temporarily weak metrics can be an excellent buy.</p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="data-card chapter-reveal" style="margin-bottom:16px; transition-delay:0.15s">
+          <p class="data-card-label">Microsoft (MSFT) · Key Metrics</p>
+          <div class="metric-grid">
+            <div class="metric"><div class="metric-lbl">P/E Ratio</div><div class="metric-val">37.5×</div></div>
+            <div class="metric"><div class="metric-lbl">Market Cap</div><div class="metric-val">$3.8T</div></div>
+            <div class="metric"><div class="metric-lbl">Gross Margin</div><div class="metric-val">68.8%</div></div>
+            <div class="metric"><div class="metric-lbl">Operating Margin</div><div class="metric-val">45.6%</div></div>
+            <div class="metric"><div class="metric-lbl">Net Profit Margin</div><div class="metric-val">36.2%</div></div>
+            <div class="metric"><div class="metric-lbl">ROIC</div><div class="metric-val">22.9%</div></div>
+            <div class="metric"><div class="metric-lbl">ROA</div><div class="metric-val">18.0%</div></div>
+            <div class="metric"><div class="metric-lbl">Debt / Equity</div><div class="metric-val">0.33×</div></div>
+          </div>
+        </div>
+        <div class="insight chapter-reveal" style="transition-delay:0.2s">
+          <p class="insight-label">How to read these numbers</p>
+          <p>A P/E of 37.5× means you're paying $37.50 for every $1 of earnings. That's a premium — which is justified only if the company keeps growing earnings. A gross margin of 68.8% means Microsoft keeps $0.69 of every revenue dollar before paying for operations. That's exceptional for a company at this scale. ROIC of 22.9% means management is generating strong returns on the capital they deploy.</p>
+        </div>
+      </div>
+
+      <div class="data-card chapter-reveal" style="transition-delay:0.25s">
+        <p class="data-card-label">Microsoft SWOT Analysis</p>
+        <div class="swot">
+          <div class="swot-q s">
+            <div class="swot-hd">Strengths</div>
+            <ul>
+              <li>Dominant Azure cloud platform</li>
+              <li>Deep enterprise relationships</li>
+              <li>Diversified revenue streams</li>
+              <li>OpenAI partnership + Copilot AI</li>
+            </ul>
+          </div>
+          <div class="swot-q w">
+            <div class="swot-hd">Weaknesses</div>
+            <ul>
+              <li>Near-zero mobile OS share</li>
+              <li>Reliance on PC OEM ecosystem</li>
+              <li>Cybersecurity exposure at scale</li>
+              <li>AI ROI still unproven</li>
+            </ul>
+          </div>
+          <div class="swot-q o">
+            <div class="swot-hd">Opportunities</div>
+            <ul>
+              <li>Enterprise AI adoption wave</li>
+              <li>Azure cloud market expansion</li>
+              <li>Gaming (Activision catalog)</li>
+              <li>Microsoft 365 Copilot pricing</li>
+            </ul>
+          </div>
+          <div class="swot-q t">
+            <div class="swot-hd">Threats</div>
+            <ul>
+              <li>AWS and Google Cloud gaining share</li>
+              <li>AI startup disruption</li>
+              <li>Antitrust regulatory risk</li>
+              <li>Major cybersecurity incident</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PHASE 5 ═══════════ -->
+<section class="chapter" id="phase-5">
+  <div class="chapter-reveal">
+    <div class="chapter-header">
+      <div class="chapter-num">5</div>
+      <div class="chapter-meta">
+        <p class="chapter-phase-id">Phase Five</p>
+        <h2 class="chapter-title">Map the<br>Competitor Network</h2>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="explain chapter-reveal" style="transition-delay:0.1s">
+        <p>Every company exists inside a network of rivals, potential entrants, and substitutes. Analyzing a company in isolation — without understanding who it's fighting and where — is like evaluating an athlete without watching their games.</p>
+        <p>The competitor network phase asks you to <strong>identify the main rivals in each business segment</strong>, then compare them on the metrics that actually determine winners: market share trajectory, margin structure, growth rate, and strategic positioning.</p>
+        <p>This isn't just "who's bigger." It's about understanding <strong>where your company wins and why</strong>, whether that advantage is durable, and whether the competitive dynamics are stable or shifting. A company leading a segment where the rules are changing may be weaker than its current metrics suggest.</p>
+        <p>You also need to think about <strong>non-obvious competition</strong> — companies that don't yet compete directly but could enter (potential entrants), and products that serve the same underlying need differently (substitutes). These are where market-share surprises come from.</p>
+        <div class="insight">
+          <p class="insight-label">The most commonly missed risk</p>
+          <p>Investor theses often assume current market share is permanent. The competitor network phase forces you to actively stress-test whether your company's position is durable — or if it's quietly under threat from a direction nobody is watching.</p>
+        </div>
+      </div>
+
+      <div class="data-card chapter-reveal" style="transition-delay:0.2s">
+        <p class="data-card-label">Case study — Cloud Infrastructure</p>
+        <h4>Azure vs. AWS vs. Google Cloud</h4>
+        <p class="sub">Market share · Growth · Positioning</p>
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Share</th>
+              <th>YoY Growth</th>
+              <th>Key Edge</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Amazon AWS</td>
+              <td>
+                ~31%
+                <div class="bar-bg"><div class="bar-fg bar-animated" style="--target-w:100%"></div></div>
+              </td>
+              <td>+17%</td>
+              <td>Broadest service catalog</td>
+            </tr>
+            <tr class="highlight">
+              <td>Microsoft Azure</td>
+              <td>
+                ~25%
+                <div class="bar-bg"><div class="bar-fg bar-animated" style="--target-w:80%"></div></div>
+              </td>
+              <td>+21%</td>
+              <td>Enterprise lock-in + AI</td>
+            </tr>
+            <tr>
+              <td>Google Cloud</td>
+              <td>
+                ~11%
+                <div class="bar-bg"><div class="bar-fg bar-animated" style="--target-w:36%"></div></div>
+              </td>
+              <td>+28%</td>
+              <td>Data analytics &amp; AI R&amp;D</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="insight" style="margin-top:20px">
+          <p class="insight-label">The takeaway</p>
+          <p>Azure is growing faster than AWS despite having less share. The structural reason: Microsoft already has enterprise relationships through Windows and Office 365. When IT teams choose a cloud provider, Azure is often the path of least resistance — they're already in the Microsoft ecosystem.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PHASE 6 ═══════════ -->
+<section class="chapter" id="phase-6" style="background:var(--ink2)">
+  <div class="chapter-reveal">
+    <div class="chapter-header">
+      <div class="chapter-num">6</div>
+      <div class="chapter-meta">
+        <p class="chapter-phase-id">Phase Six</p>
+        <h2 class="chapter-title">Portfolio<br>Allocation</h2>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="explain chapter-reveal" style="transition-delay:0.1s">
+        <p>The final phase is where individual analysis becomes a <strong>portfolio decision</strong>. You've run INAS across multiple sectors and companies. Now you decide: how much weight does each position deserve?</p>
+        <p>Allocation is about <strong>translating conviction into position sizing</strong>. A company you understand deeply, with a clear thesis and limited downside risk, might deserve 15–20% of your portfolio. A company with an exciting story but higher uncertainty might deserve 5%. Treating every position equally ignores all the analysis you just did.</p>
+        <p>Good portfolio construction also requires thinking about <strong>correlation</strong>. If you hold three Tech companies and one Energy company, you're not really diversified — when Tech has a bad quarter, your whole portfolio suffers together. INAS is designed to guide you through multiple sectors precisely so you can allocate across uncorrelated exposures.</p>
+        <div class="insight">
+          <p class="insight-label">The point of all six phases</p>
+          <p>Each phase builds the context for the next. By Phase 6, your allocation is grounded in macro awareness, industry dynamics, company fundamentals, and competitive reality — not a gut feeling or a headline. That discipline is what INAS is for.</p>
+        </div>
+      </div>
+
+      <div class="data-card chapter-reveal" style="transition-delay:0.2s">
+        <p class="data-card-label">Example allocation · After completing all 6 phases across 4 sectors</p>
+        <h4>Sector-Weighted Portfolio</h4>
+        <p class="sub">Illustrative only — not investment advice</p>
+        <ul class="alloc-list">
+          <li class="alloc-row">
+            <span class="alloc-name">Technology</span>
+            <div class="alloc-bar-bg"><div class="alloc-bar-fg bar-animated" style="--target-w:35%"></div></div>
+            <span class="alloc-pct">35%</span>
+          </li>
+          <li class="alloc-row">
+            <span class="alloc-name">Healthcare</span>
+            <div class="alloc-bar-bg"><div class="alloc-bar-fg bar-animated" style="--target-w:25%"></div></div>
+            <span class="alloc-pct">25%</span>
+          </li>
+          <li class="alloc-row">
+            <span class="alloc-name">Financials</span>
+            <div class="alloc-bar-bg"><div class="alloc-bar-fg bar-animated" style="--target-w:20%"></div></div>
+            <span class="alloc-pct">20%</span>
+          </li>
+          <li class="alloc-row">
+            <span class="alloc-name">Utilities</span>
+            <div class="alloc-bar-bg"><div class="alloc-bar-fg bar-animated" style="--target-w:15%"></div></div>
+            <span class="alloc-pct">15%</span>
+          </li>
+          <li class="alloc-row">
+            <span class="alloc-name">Cash Reserve</span>
+            <div class="alloc-bar-bg"><div class="alloc-bar-fg bar-animated" style="--target-w:5%"></div></div>
+            <span class="alloc-pct">5%</span>
+          </li>
+        </ul>
+        <p style="font-size:12px; color:var(--dim2); margin-top:18px; line-height:1.6">Your macro analysis from Phase 2 directly informs this. In a high-rate environment, defensive sectors like Healthcare and Utilities get more weight. In an expansion, growth sectors like Technology earn more. The allocation reflects your thesis — not a formula.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="closing" id="closing">
+  <h2 class="closing-headline chapter-reveal">
+    Now you know<br>where to <span class="accent">start.</span>
+  </h2>
+  <p class="closing-sub chapter-reveal" style="transition-delay:0.1s">
+    Apply INAS to any company. Start with the economy. End with a decision you can actually defend.
+  </p>
+  <div class="chapter-reveal" style="transition-delay:0.2s">
+    <a href="#top" class="btn-primary">Read from the top ↑</a>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-mark">INAS</span>
+  <span>Industry Network Analysis Framework · Built for students and self-taught investors</span>
+  <span style="color:var(--dim2); font-family:'JetBrains Mono',monospace; font-size:10px">Not investment advice</span>
+</footer>
+
+<script>
+  // Nav scroll class
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // Hero phase strip stagger on load
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.phase-strip-item').forEach(el => {
+      requestAnimationFrame(() => el.classList.add('entered'));
+    });
+  });
+
+  // Scroll reveal — motivated: each chapter enters as a unit when it hits viewport
+  const revealEls = document.querySelectorAll('.chapter-reveal, .stagger-child');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -48px 0px' });
+  revealEls.forEach(el => io.observe(el));
+
+  // Bar animations — run when parent enters viewport
+  const barEls = document.querySelectorAll('.bar-animated');
+  const barIO = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // small delay so user sees the bar grow
+        setTimeout(() => entry.target.classList.add('in'), 200);
+        barIO.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  barEls.forEach(el => barIO.observe(el));
+</script>
+
+</body>
+</html>
