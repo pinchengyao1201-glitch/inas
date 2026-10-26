@@ -598,6 +598,27 @@ footer {
 .bar-animated { width: 0 !important; }
 .bar-animated.in { width: var(--target-w) !important; }
 
+/* ── BYLINE ─────────────────────────────────────────────── */
+.hero-byline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--gold-lo);
+  text-transform: uppercase;
+  margin: -24px 0 36px;
+}
+.hero-byline strong { color: var(--gold); font-weight: 500; }
+.loss { color: #BF5D5D !important; }
+
+/* ── PRINT / SAVE AS PDF ────────────────────────────────── */
+@media print {
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  nav { position: absolute; }
+  .chapter-reveal, .stagger-child, .phase-strip-item { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .bar-animated { width: var(--target-w) !important; }
+  .chapter, .closing { break-inside: avoid-page; }
+}
+
 /* ── RESPONSIVE ─────────────────────────────────────────── */
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; min-height: auto; padding: 100px 5vw 80px; gap: 48px; }
@@ -621,10 +642,14 @@ footer {
 <nav id="nav">
   <div class="nav-wordmark">INAS</div>
   <div class="nav-right">
-    <a href="#phase-1">Phase 1</a>
-    <a href="#phase-3">Phase 3</a>
-    <a href="#phase-5">Phase 5</a>
-    <a href="#closing" class="nav-pill">Start Reading</a>
+    <a href="#phase-1">Sector</a>
+    <a href="#phase-2">Macro</a>
+    <a href="#phase-3">Industry</a>
+    <a href="#phase-4">Company</a>
+    <a href="#phase-5">Competitors</a>
+    <a href="#phase-6">Portfolio</a>
+    <a href="#stress-test">Limits</a>
+    <a href="#phase-1" class="nav-pill">Start Reading</a>
   </div>
 </nav>
 
@@ -634,11 +659,12 @@ footer {
 
   <div class="hero-left">
     <h1 class="hero-statement">
-      The system behind<br>every <span class="accent">smart</span><br>investment thesis.
+      Analyze a company<br>from the <span class="accent">economy</span><br>down.
     </h1>
     <p class="hero-desc">
-      Most people pick stocks by instinct. INAS is a six-phase framework that teaches you how to analyze a company the right way — starting from the economy, not the ticker.
+      Most people pick stocks by instinct. INAS is a six-phase framework I built to analyze companies — starting from the economy, not the ticker — and taught to members of my investment club.
     </p>
+    <p class="hero-byline">Designed by <strong>Pincheng Yao</strong> · Co-founder, Wealth and Portfolio Club</p>
     <div class="hero-actions">
       <a href="#phase-1" class="btn-primary">Read the framework ↓</a>
       <a href="#overview" class="btn-ghost">See all phases</a>
@@ -728,7 +754,7 @@ footer {
         <p class="data-card-label">Running example</p>
         <h4>We chose Technology</h4>
         <p class="sub">S&amp;P 500 Sector · ~29% Index Weight</p>
-        <p style="font-size:13px; color:var(--dim); line-height:1.7; margin-bottom:20px">Technology is the largest sector in the S&amp;P 500. It spans semiconductors, cloud software, hardware, and AI infrastructure. In 2025, the primary tailwind is a massive wave of AI spending — enterprises are racing to build AI capabilities, which directly lifts revenue for the companies inside this sector.</p>
+        <p style="font-size:13px; color:var(--dim); line-height:1.7; margin-bottom:20px">Technology is the largest sector in the S&amp;P 500. It spans semiconductors, cloud software, hardware, and AI infrastructure. The primary tailwind right now is a massive wave of AI spending — enterprises are racing to build AI capabilities, which directly lifts revenue for the companies inside this sector.</p>
         <div class="funnel">
           <div class="funnel-row active">
             <span class="funnel-key">Sector</span>
@@ -1109,6 +1135,46 @@ footer {
   </div>
 </section>
 
+<!-- ═══════════ STRESS TEST ═══════════ -->
+<section class="chapter" id="stress-test">
+  <div class="chapter-reveal">
+    <div class="chapter-header">
+      <div class="chapter-num">?</div>
+      <div class="chapter-meta">
+        <p class="chapter-phase-id">Stress Test</p>
+        <h2 class="chapter-title">What INAS<br>Can't Do Yet</h2>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="explain chapter-reveal" style="transition-delay:0.1s">
+        <p>Microsoft is an easy case: strong numbers, a clear moat. So I ran INAS on a harder one. <strong>CoreWeave</strong> brought in $5.1 billion in revenue in 2025 but lost $1.17 billion. It also reported <strong>$66.8 billion in expected future revenue</strong> from customer contracts.</p>
+        <p>In Phase 4, the loss counted against CoreWeave, while its customer commitments pointed to future growth. Investors weren't ignoring the loss; they were betting that future demand would justify it. <strong>INAS had no way to weigh that bet.</strong></p>
+        <p>If INAS struggles with an established company, it can't yet evaluate a startup with little financial history at all.</p>
+        <div class="insight">
+          <p class="insight-label">The next version</p>
+          <p>INAS needs to help investors separate what the numbers show from what they believe a company could become.</p>
+        </div>
+      </div>
+
+      <div class="data-card chapter-reveal" style="transition-delay:0.2s">
+        <p class="data-card-label">CoreWeave (CRWV) · FY2025</p>
+        <div class="metric-grid">
+          <div class="metric"><div class="metric-lbl">Revenue</div><div class="metric-val">$5.1B</div></div>
+          <div class="metric"><div class="metric-lbl">Net Income</div><div class="metric-val loss">−$1.17B</div></div>
+          <div class="metric"><div class="metric-lbl">Contract Backlog</div><div class="metric-val">$66.8B</div></div>
+          <div class="metric"><div class="metric-lbl">INAS Verdict</div><div class="metric-val loss">Conflicted</div></div>
+        </div>
+        <div class="funnel" style="margin-top:20px">
+          <div class="funnel-row"><span class="funnel-key">Numbers</span><span class="funnel-val">Losing money today</span></div>
+          <div class="funnel-row"><span class="funnel-key">Contracts</span><span class="funnel-val">Huge demand promised</span></div>
+          <div class="funnel-row active"><span class="funnel-key">Missing</span><span class="funnel-val">How to weigh belief against evidence</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CLOSING -->
 <section class="closing" id="closing">
   <h2 class="closing-headline chapter-reveal">
@@ -1124,7 +1190,7 @@ footer {
 
 <footer>
   <span class="footer-mark">INAS</span>
-  <span>Industry Network Analysis Framework · Built for students and self-taught investors</span>
+  <span>Industry Network Analysis Framework · Built by Pincheng Yao for students and self-taught investors</span>
   <span style="color:var(--dim2); font-family:'JetBrains Mono',monospace; font-size:10px">Not investment advice</span>
 </footer>
 
