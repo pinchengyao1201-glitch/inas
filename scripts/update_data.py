@@ -19,7 +19,7 @@ import os
 import re
 import sys
 import urllib.request
-from datetime import date
+
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INDEX = os.path.join(HERE, "..", "index.html")
@@ -70,7 +70,6 @@ def collect_macro():
                 out[key] = fmt.format(v)
         except Exception as e:
             print(f"  ! {key}: {e}")
-    out["updated"] = date.today().isoformat()
     return out
 
 
